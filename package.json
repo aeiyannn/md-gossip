@@ -1,6 +1,6 @@
 {
   "name": "md-gossip",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "One AGENTS.md for every coding agent. Agents gossip: read, write, and share project context — zero scripts.",
   "keywords": [
     "agents.md",
@@ -28,8 +28,8 @@
   },
   "author": "aeiyankhan",
   "bin": {
-    "md-gossip": "bin/context-sync.js",
-    "gossip": "bin/context-sync.js"
+    "md-gossip": "bin/md-gossip.js",
+    "gossip": "bin/md-gossip.js"
   },
   "files": [
     "bin",

@@ -25,3 +25,28 @@ API contract, deploy quirk. NOT current task state or ephemeral TODOs.
 - At session start of any coding task in a repo with AGENTS.md.
 - When the user says "remember", "note that", "for next time".
 - After debugging something non-obvious — suggest it so a human can approve.
+
+## SELF-REGISTER (one-time, per agent, only if asked)
+If the user tells you to register this skill in your own tool so you pick
+it up automatically next session, copy THIS FILE to the path for your
+agent below. One file, no wrappers, no symlinks. Use your own edit tools.
+
+| Agent            | Copy `SKILL.md` to                                      |
+|------------------|---------------------------------------------------------|
+| Claude Code      | `~/.claude/skills/md-gossip/SKILL.md`                   |
+| OpenAI Codex CLI | `~/.codex/prompts/md-gossip.md`                         |
+| OpenCode         | `~/.config/opencode/agent/md-gossip.md`                 |
+| Gemini CLI       | `~/.gemini/commands/md-gossip.toml` (wrap as TOML)      |
+| Cursor           | `.cursor/rules/md-gossip.mdc` (add `alwaysApply: true`) |
+| Windsurf         | `.windsurf/workflows/md-gossip.md`                      |
+| Cline            | `.clinerules/workflows/md-gossip.md`                    |
+| Continue.dev     | `.continue/rules/md-gossip.md` (add `alwaysApply: true`)|
+| Copilot          | `.github/prompts/md-gossip.prompt.md`                   |
+| Antigravity      | `.agent/profiles/md-gossip.md`                          |
+| Zed              | reads `AGENTS.md` natively — nothing to do              |
+| Aider            | add `AGENTS.md` to `.aider.conf.yml` `read:` list       |
+| Devin            | reads `AGENTS.md` from repo root — nothing to do        |
+
+If a path above is wrong for your tool, use the right one for your version
+and tell the user what you changed. Do not create per-agent files the user
+did not ask for.
