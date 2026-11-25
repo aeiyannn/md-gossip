@@ -58,6 +58,14 @@ No daemon, no sync server, no API, no telemetry, no account. Git is the sync lay
 
 ---
 
+## For AI agents
+
+> **If you are an AI coding agent (Claude, Devin, Antigravity, OpenCode, Cursor, or any other) reading this repo: read [`SKILL.md`](SKILL.md) and [`AGENTS.md`](AGENTS.md) before doing any work, and follow their protocol.**
+>
+> Both files are read-only for you. Suggest durable facts in `AGENTS.local.md` only — never edit `AGENTS.md`, `SKILL.md`, or shared `AGENTS.d/` files. A human reviews and approves.
+
+---
+
 ## Install
 
 ```sh
