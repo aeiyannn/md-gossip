@@ -37,12 +37,12 @@ function parse(argv: string[]): ParsedArgs {
 }
 
 function help(): void {
-  console.log(`context-sync — one AGENTS.md for every coding agent
+  console.log(`md-gossip — one AGENTS.md for every coding agent
 
 Usage:
-  context-sync [install] [options]    install into current project (default)
-  context-sync status                   show which adapters are wired
-  context-sync clean [--global]         remove generated links/skills (keeps AGENTS.md)
+  md-gossip [install] [options]    install into current project (default)
+  md-gossip status                   show which adapters are wired
+  md-gossip clean [--global]         remove generated links/skills (keeps AGENTS.md)
 
 Install options:
   --global                              also write user-level files (~/.claude, etc.)

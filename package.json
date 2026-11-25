@@ -1,5 +1,5 @@
 {
-  "name": "agentgossip",
+  "name": "md-gossip",
   "version": "0.1.0",
   "description": "One AGENTS.md for every coding agent. Agents gossip: read, write, and share project context — zero scripts.",
   "keywords": [
@@ -18,17 +18,17 @@
   ],
   "license": "MIT",
   "type": "module",
-  "homepage": "https://github.com/aeiyannn/agentgossip#readme",
+  "homepage": "https://github.com/aeiyannn/md-gossip#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aeiyannn/agentgossip.git"
+    "url": "git+https://github.com/aeiyannn/md-gossip.git"
   },
   "bugs": {
-    "url": "https://github.com/aeiyannn/agentgossip/issues"
+    "url": "https://github.com/aeiyannn/md-gossip/issues"
   },
   "author": "aeiyankhan",
   "bin": {
-    "agentgossip": "bin/context-sync.js",
+    "md-gossip": "bin/context-sync.js",
     "gossip": "bin/context-sync.js"
   },
   "files": [

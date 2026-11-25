@@ -15,7 +15,7 @@ export function renderSkill(format: SkillFormat, body: string): string {
     case "claude-skill":
       return frontmatter(
         {
-          name: "context-sync",
+          name: "md-gossip",
           description:
             "Shared agent memory via AGENTS.md + AGENTS.d/. Read first, grep on demand, append durable facts.",
         },
@@ -24,7 +24,7 @@ export function renderSkill(format: SkillFormat, body: string): string {
     case "opencode-agent":
       return frontmatter(
         {
-          name: "context-sync",
+          name: "md-gossip",
           mode: "subagent",
           description:
             "Shared agent memory via AGENTS.md + AGENTS.d/. Read first, grep on demand, append durable facts.",

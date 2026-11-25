@@ -8,7 +8,7 @@ import { expandHome } from "../core/paths.js";
 export function status(cwd: string): void {
   const agentsMd = path.join(cwd, "AGENTS.md");
   if (exists(agentsMd)) log.ok(`AGENTS.md found at ${agentsMd}`);
-  else log.warn("AGENTS.md not found in cwd — run `context-sync install`.");
+  else log.warn("AGENTS.md not found in cwd — run `md-gossip install`.");
 
   console.log("");
   console.log("Adapters:");

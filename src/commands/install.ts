@@ -112,7 +112,7 @@ function installProject(
       if (mode === "copy") {
         log.warn(
           `${a.label}: ${rel} fell back to COPY (symlink unavailable). ` +
-            `Re-run \`context-sync install --force\` after editing AGENTS.md ` +
+            `Re-run \`md-gossip install --force\` after editing AGENTS.md ` +
             `to re-sync.`,
         );
       } else {

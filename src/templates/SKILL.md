@@ -1,6 +1,6 @@
-# context-sync — shared agent memory
+# md-gossip — shared agent memory
 
-You are reading this because the user installed `context-sync`. Your job:
+You are reading this because the user installed `md-gossip`. Your job:
 
 ## READ (before answering)
 1. Load `AGENTS.md` — tiny router with pinned facts + tag index.

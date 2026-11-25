@@ -33,7 +33,7 @@ test("install wires claude + opencode targets", () => {
   assert.ok(fs.existsSync(path.join(cwd, "CLAUDE.md")), "CLAUDE.md wired");
   // opencode's project target IS AGENTS.md itself, so nothing extra; skill file exists
   assert.ok(
-    fs.existsSync(path.join(cwd, ".opencode", "agent", "context-sync.md")),
+    fs.existsSync(path.join(cwd, ".opencode", "agent", "md-gossip.md")),
     "opencode skill exists",
   );
 });
@@ -42,7 +42,7 @@ test("install wires cursor wrapper with alwaysApply: true", () => {
   const cwd = tmpRepo();
   install({ cwd, only: ["cursor"], global: false, force: false, skipAgentsMd: false });
 
-  const mdc = path.join(cwd, ".cursor", "rules", "context-sync.mdc");
+  const mdc = path.join(cwd, ".cursor", "rules", "md-gossip.mdc");
   assert.ok(fs.existsSync(mdc));
   const content = fs.readFileSync(mdc, "utf8");
   assert.match(content, /alwaysApply: true/);
@@ -102,7 +102,7 @@ test("continue adapter writes frontmatter wrapper, not raw symlink", () => {
     force: false,
     skipAgentsMd: false,
   });
-  const rulePath = path.join(cwd, ".continue", "rules", "context-sync.md");
+  const rulePath = path.join(cwd, ".continue", "rules", "md-gossip.md");
   assert.ok(fs.existsSync(rulePath));
   const content = fs.readFileSync(rulePath, "utf8");
   assert.match(content, /alwaysApply: true/);

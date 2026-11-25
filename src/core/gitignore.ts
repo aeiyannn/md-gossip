@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const MARK_START = "# >>> context-sync (generated, do not edit) >>>";
-const MARK_END = "# <<< context-sync <<<";
+const MARK_START = "# >>> md-gossip (generated, do not edit) >>>";
+const MARK_END = "# <<< md-gossip <<<";
 
 /** Idempotently add a block of ignore entries between markers. */
 export function upsertGitignore(repoRoot: string, entries: string[]): void {

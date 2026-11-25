@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/logo.png" width="128" height="128" alt="agentgossip logo: a purple hash symbol wrapped by a sync arc">
+  <img src="assets/logo.png" width="128" height="128" alt="md-gossip logo: a purple hash symbol wrapped by a sync arc">
 </p>
 
-<h1 align="center">agentgossip</h1>
+<h1 align="center">md-gossip</h1>
 
 <p align="center">
   <b>The place where your AI agents gossip.</b><br>
@@ -62,7 +62,7 @@ No daemon, no sync server, no API, no telemetry, no account. Git is the sync lay
 
 ```sh
 cd your-project
-npx agentgossip install
+npx md-gossip install
 git add AGENTS.md AGENTS.d/ .gitignore
 git commit -m "add shared agent context"
 git push
@@ -73,7 +73,7 @@ That's it. Every supported agent now reads `AGENTS.md` on session start and appe
 **Global install** (write once per machine, every project inherits):
 
 ```sh
-npx agentgossip install --global
+npx md-gossip install --global
 ```
 
 ---
@@ -92,8 +92,8 @@ your-repo/
 │   └── prefs.md
 ├── CLAUDE.md              ← symlink → AGENTS.md (gitignored)
 ├── GEMINI.md               ← symlink → AGENTS.md (gitignored)
-├── .cursor/rules/agentgossip.mdc        ← wrapper with alwaysApply (gitignored)
-├── .continue/rules/agentgossip.md       ← wrapper with alwaysApply (gitignored)
+├── .cursor/rules/md-gossip.mdc        ← wrapper with alwaysApply (gitignored)
+├── .continue/rules/md-gossip.md       ← wrapper with alwaysApply (gitignored)
 ├── .github/copilot-instructions.md       ← symlink (gitignored)
 ├── .windsurf/rules/context.md            ← wrapper (gitignored)
 └── ...
@@ -171,15 +171,15 @@ Grep-friendly. Human-readable. Diff-friendly in git. No embeddings, no RAG, no J
 ## Commands
 
 ```sh
-agentgossip install                       # default — wires all adapters
-agentgossip install --global              # also write to ~/.claude, ~/.codex, etc.
-agentgossip install --only claude-code,opencode,devin
-agentgossip install --force               # overwrite existing wrappers
-agentgossip install --skip-agents-md      # wire adapters without touching AGENTS.md
+md-gossip install                       # default — wires all adapters
+md-gossip install --global              # also write to ~/.claude, ~/.codex, etc.
+md-gossip install --only claude-code,opencode,devin
+md-gossip install --force               # overwrite existing wrappers
+md-gossip install --skip-agents-md      # wire adapters without touching AGENTS.md
 
-agentgossip status                        # show what's wired
-agentgossip clean                         # remove generated links/skills
-agentgossip clean --global                # also clean user-level files
+md-gossip status                        # show what's wired
+md-gossip clean                         # remove generated links/skills
+md-gossip clean --global                # also clean user-level files
 ```
 
 Aliased as `gossip`.
@@ -194,7 +194,7 @@ The install is designed for clean repos.
 - **Gitignored:** every per-agent symlink, wrapper, and skill file.
 - **Gitignored automatically:** `AGENTS.local.md` and `AGENTS.d/local/` for personal overrides.
 
-GitHub's file tree shows only the router and the chunks. Teammates not using `agentgossip` still see the shared context — GitHub renders `AGENTS.md` fine and most agents read it natively even without local wiring.
+GitHub's file tree shows only the router and the chunks. Teammates not using `md-gossip` still see the shared context — GitHub renders `AGENTS.md` fine and most agents read it natively even without local wiring.
 
 ---
 
@@ -243,8 +243,8 @@ TypeScript workspace, strict mode, ESM, no bundler.
 Building needs Node 18 or later.
 
 ```sh
-git clone https://github.com/<you>/agentgossip
-cd agentgossip
+git clone https://github.com/<you>/md-gossip
+cd md-gossip
 npm install
 npm run build
 npm test
@@ -253,7 +253,7 @@ npm test
 Run the CLI from source:
 
 ```sh
-node bin/agentgossip.js install --help
+node bin/md-gossip.js install --help
 ```
 
 ---
@@ -269,9 +269,9 @@ node bin/agentgossip.js install --help
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Copyright © 2026 the agentgossip contributors.
+MIT — see [LICENSE](LICENSE). Copyright © 2026 the md-gossip contributors.
 
 <p align="center">
-  <img src="assets/logo.png" width="32" height="32" alt="agentgossip"><br>
+  <img src="assets/logo.png" width="32" height="32" alt="md-gossip"><br>
   <sub>One file. Every agent. Done.</sub>
 </p>
