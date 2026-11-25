@@ -1,0 +1,49 @@
+import path from "node:path";
+
+import { ADAPTERS } from "../adapters/index.js";
+import { isSymlink, safeRemove } from "../core/fs.js";
+import { removeGitignoreBlock } from "../core/gitignore.js";
+import { log } from "../core/log.js";
+import { expandHome } from "../core/paths.js";
+
+export interface CleanOptions {
+  cwd: string;
+  global: boolean;
+}
+
+/**
+ * Remove generated targets. AGENTS.md + AGENTS.d/ are NEVER touched —
+ * they are user content. Only wrappers, symlinks, and skill files go.
+ */
+export function clean(opts: CleanOptions): void {
+  let removed = 0;
+  const agentsMd = path.resolve(opts.cwd, "AGENTS.md");
+
+  for (const a of ADAPTERS) {
+    for (const rel of a.projectTargets) {
+      const target = path.join(opts.cwd, rel);
+      if (path.resolve(target) === agentsMd) continue;
+      // For non-wrapper targets we only remove if they're symlinks (we made them).
+      // For wrappers (cursor/windsurf) we remove regardless — they're generated.
+      if (a.wrapper || isSymlink(target)) {
+        if (safeRemove(target)) {
+          removed++;
+          log.info(`removed ${rel}`);
+        }
+      }
+    }
+    if (a.projectSkill && safeRemove(path.join(opts.cwd, a.projectSkill))) {
+      removed++;
+      log.info(`removed ${a.projectSkill}`);
+    }
+    if (opts.global) {
+      if (a.globalTarget && isSymlink(expandHome(a.globalTarget))) {
+        if (safeRemove(expandHome(a.globalTarget))) removed++;
+      }
+      if (a.globalSkill && safeRemove(expandHome(a.globalSkill))) removed++;
+    }
+  }
+
+  removeGitignoreBlock(opts.cwd);
+  log.ok(`Removed ${removed} file(s). AGENTS.md + AGENTS.d/ left untouched.`);
+}

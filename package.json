@@ -1,0 +1,40 @@
+{
+  "name": "context-sync",
+  "version": "0.1.0",
+  "description": "One AGENTS.md for every coding agent. Shared context, zero scripts.",
+  "keywords": [
+    "agents.md",
+    "ai",
+    "claude",
+    "codex",
+    "devin",
+    "opencode",
+    "antigravity",
+    "cursor",
+    "copilot",
+    "context"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "context-sync": "bin/context-sync.js",
+    "ctxsync": "bin/context-sync.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && node scripts/copy-templates.mjs",
+    "prepublishOnly": "npm run build",
+    "test": "npm run build && node --test dist/test/smoke.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.4.0"
+  }
+}
