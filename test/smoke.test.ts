@@ -11,12 +11,13 @@ function tmpRepo(): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), "csync-"));
 }
 
-test("install creates AGENTS.md and chunks", () => {
+test("install creates AGENTS.md and SKILL.md only", () => {
   const cwd = tmpRepo();
   install({ cwd, global: false, force: false, skipAgentsMd: false });
 
   assert.ok(fs.existsSync(path.join(cwd, "AGENTS.md")), "AGENTS.md exists");
-  assert.ok(fs.existsSync(path.join(cwd, "AGENTS.d", "stack.md")), "stack chunk exists");
+  assert.ok(fs.existsSync(path.join(cwd, "SKILL.md")), "shared SKILL.md exists");
+  assert.ok(!fs.existsSync(path.join(cwd, "AGENTS.d")), "no AGENTS.d seeded");
   assert.ok(fs.existsSync(path.join(cwd, ".gitignore")), ".gitignore exists");
 });
 
@@ -28,6 +29,7 @@ test("install wires claude + opencode targets", () => {
     global: false,
     force: false,
     skipAgentsMd: false,
+    skills: true,
   });
 
   assert.ok(fs.existsSync(path.join(cwd, "CLAUDE.md")), "CLAUDE.md wired");
@@ -35,6 +37,47 @@ test("install wires claude + opencode targets", () => {
   assert.ok(
     fs.existsSync(path.join(cwd, ".opencode", "agent", "md-gossip.md")),
     "opencode skill exists",
+  );
+});
+
+test("per-agent skill files are opt-in via skills flag", () => {
+  const cwd = tmpRepo();
+  install({
+    cwd,
+    only: ["opencode", "claude-code"],
+    global: false,
+    force: false,
+    skipAgentsMd: false,
+  });
+
+  assert.ok(fs.existsSync(path.join(cwd, "SKILL.md")), "shared SKILL.md exists");
+  assert.ok(
+    !fs.existsSync(path.join(cwd, ".opencode", "agent", "md-gossip.md")),
+    "no per-agent skill by default",
+  );
+  assert.ok(
+    !fs.existsSync(path.join(cwd, ".claude", "skills", "md-gossip", "SKILL.md")),
+    "no claude skill by default",
+  );
+});
+
+test("minimal install skips SKILL.md and skill files", () => {
+  const cwd = tmpRepo();
+  install({
+    cwd,
+    only: ["claude-code"],
+    global: false,
+    force: false,
+    skipAgentsMd: false,
+    minimal: true,
+    skills: true,
+  });
+
+  assert.ok(fs.existsSync(path.join(cwd, "AGENTS.md")), "AGENTS.md exists");
+  assert.ok(!fs.existsSync(path.join(cwd, "SKILL.md")), "no SKILL.md in minimal");
+  assert.ok(
+    !fs.existsSync(path.join(cwd, ".claude", "skills", "md-gossip", "SKILL.md")),
+    "no per-agent skill in minimal",
   );
 });
 
@@ -59,10 +102,25 @@ test("install is idempotent", () => {
   assert.equal(before, after);
 });
 
-test("clean removes generated files but keeps AGENTS.md + chunks", () => {
+test("default install creates no agent pointer files", () => {
   const cwd = tmpRepo();
   install({ cwd, global: false, force: false, skipAgentsMd: false });
+
+  assert.ok(fs.existsSync(path.join(cwd, "AGENTS.md")), "AGENTS.md exists");
+  assert.ok(fs.existsSync(path.join(cwd, "SKILL.md")), "SKILL.md exists");
+  assert.ok(!fs.existsSync(path.join(cwd, "CLAUDE.md")), "no CLAUDE.md");
+  assert.ok(!fs.existsSync(path.join(cwd, ".cursor")), "no .cursor dir");
+  assert.ok(!fs.existsSync(path.join(cwd, ".github")), "no .github dir");
+  assert.ok(!fs.existsSync(path.join(cwd, ".aider.conf.yml")), "no aider conf");
+});
+
+test("clean removes generated files but keeps AGENTS.md + chunks", () => {
+  const cwd = tmpRepo();
+  install({ cwd, global: false, force: false, skipAgentsMd: false, agents: true });
   assert.ok(fs.existsSync(path.join(cwd, "CLAUDE.md")));
+  // Simulate a user-created AGENTS.d chunk.
+  fs.mkdirSync(path.join(cwd, "AGENTS.d"), { recursive: true });
+  fs.writeFileSync(path.join(cwd, "AGENTS.d", "stack.md"), "#stack fact\n", "utf8");
 
   clean({ cwd, global: false });
 

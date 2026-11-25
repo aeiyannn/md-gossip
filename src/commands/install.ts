@@ -3,11 +3,11 @@ import path from "node:path";
 
 import { ADAPTERS, byName, type Adapter } from "../adapters/index.js";
 import { renderSkill } from "../adapters/skillFormats.js";
-import { ensureDir, exists, linkOrCopy, writeFile } from "../core/fs.js";
+import { exists, linkOrCopy, writeFile } from "../core/fs.js";
 import { upsertGitignore } from "../core/gitignore.js";
 import { log } from "../core/log.js";
 import { expandHome } from "../core/paths.js";
-import { listChunkTemplates, loadTemplate } from "../core/templates.js";
+import { loadTemplate } from "../core/templates.js";
 import {
   continueRuleWrapper,
   cursorMdcWrapper,
@@ -20,9 +20,33 @@ export interface InstallOptions {
   global: boolean;
   force: boolean;
   skipAgentsMd: boolean;
+  minimal?: boolean;
+  skills?: boolean;
+  agents?: boolean;
 }
 
 export function install(opts: InstallOptions): void {
+  if (!opts.skipAgentsMd) {
+    seedAgentsMd(opts.cwd, opts.force);
+  }
+  if (!opts.minimal) {
+    seedSkillMd(opts.cwd, opts.force);
+  }
+
+  // Always protect personal override files from accidental commit.
+  const ignoreEntries: string[] = ["AGENTS.local.md", "AGENTS.d/local/"];
+
+  // --only implies the user wants adapter wiring even without --agents.
+  const wireAgents = opts.agents === true || (opts.only !== undefined && opts.only.length > 0);
+
+  if (!wireAgents) {
+    upsertGitignore(opts.cwd, ignoreEntries);
+    log.ok(".gitignore updated");
+    log.ok("Core files ready. Run `md-gossip install --agents` to wire agent pointer files,");
+    log.ok("or `md-gossip prompt <agent>` for a manual paste-in prompt.");
+    return;
+  }
+
   const adapters = pickAdapters(opts.only);
   if (adapters.length === 0) {
     log.err("No adapters matched --only filter");
@@ -30,17 +54,20 @@ export function install(opts: InstallOptions): void {
     return;
   }
 
-  if (!opts.skipAgentsMd) {
-    seedAgentsMd(opts.cwd, opts.force);
-  }
-
   const agentsMd = path.join(opts.cwd, "AGENTS.md");
-  // Always protect personal override files from accidental commit.
-  const ignoreEntries: string[] = ["AGENTS.local.md", "AGENTS.d/local/"];
 
   for (const a of adapters) {
-    installProject(a, opts.cwd, agentsMd, ignoreEntries, opts.force);
-    if (opts.global) installGlobal(a, agentsMd, opts.force);
+    installProject(
+      a,
+      opts.cwd,
+      agentsMd,
+      ignoreEntries,
+      opts.force,
+      opts.skills === true && opts.minimal !== true,
+    );
+    if (opts.global && !opts.minimal) {
+      installGlobal(a, agentsMd, opts.force, opts.skills === true);
+    }
     if (a.note) log.dim(`  ${a.label}: ${a.note}`);
   }
 
@@ -74,15 +101,23 @@ function seedAgentsMd(cwd: string, force: boolean): void {
     writeFile(dest, loadTemplate("AGENTS.md"));
     log.ok("Wrote AGENTS.md");
   }
+  log.dim("AGENTS.d/ is optional — create chunks on demand, agents suggest via AGENTS.local.md");
+}
 
-  const chunksDir = path.join(cwd, "AGENTS.d");
-  ensureDir(chunksDir);
-  for (const chunk of listChunkTemplates()) {
-    const target = path.join(chunksDir, chunk);
-    if (exists(target) && !force) continue;
-    writeFile(target, loadTemplate(path.join("AGENTS.d", chunk)));
+/**
+ * One shared SKILL.md at repo root — the manual guide every agent reads.
+ * Replaces per-agent skill files so the repo stays clean.
+ */
+function seedSkillMd(cwd: string, force: boolean): void {
+  const dest = path.join(cwd, "SKILL.md");
+  const content = loadTemplate("SKILL.md");
+  if (exists(dest) && !force) {
+    if (fs.readFileSync(dest, "utf8") === content) return;
+    log.info("SKILL.md already exists — keeping it. Use --force to overwrite.");
+    return;
   }
-  log.ok("Seeded AGENTS.d/ chunks");
+  writeFile(dest, content);
+  log.ok("Wrote SKILL.md (shared agent guide)");
 }
 
 function installProject(
@@ -91,6 +126,7 @@ function installProject(
   agentsMd: string,
   ignoreEntries: string[],
   force: boolean,
+  skills: boolean,
 ): void {
   // 1. Project instruction target
   for (const rel of a.projectTargets) {
@@ -122,8 +158,8 @@ function installProject(
     ignoreEntries.push(normalizeIgnore(rel));
   }
 
-  // 2. Project skill file
-  if (a.projectSkill && a.skillFormat !== "none") {
+  // 2. Project skill file (only with --skills)
+  if (skills && a.projectSkill && a.skillFormat !== "none") {
     // Skip if the project skill is the same path as the project target
     // (e.g. cursor .mdc file doubles as rule + skill).
     const isAlsoTarget = a.projectTargets.includes(a.projectSkill);
@@ -142,7 +178,12 @@ function installProject(
   }
 }
 
-function installGlobal(a: Adapter, agentsMd: string, force: boolean): void {
+function installGlobal(
+  a: Adapter,
+  agentsMd: string,
+  force: boolean,
+  skills: boolean,
+): void {
   if (a.globalTarget) {
     const target = expandHome(a.globalTarget);
     if (exists(target) && !force) {
@@ -152,7 +193,7 @@ function installGlobal(a: Adapter, agentsMd: string, force: boolean): void {
       log.info(`${a.label} (global): ${a.globalTarget} (${mode})`);
     }
   }
-  if (a.globalSkill && a.skillFormat !== "none") {
+  if (skills && a.globalSkill && a.skillFormat !== "none") {
     const target = expandHome(a.globalSkill);
     writeSkill(target, a.skillFormat, force);
     log.info(`${a.label} (global skill): ${a.globalSkill}`);

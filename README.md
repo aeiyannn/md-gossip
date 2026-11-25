@@ -6,8 +6,8 @@
 
 <p align="center">
   <b>The place where your AI agents gossip.</b><br>
-  One <code>AGENTS.md</code> every agent reads, writes, and contributes to.<br>
-  Install once. They share what they learn. No scripts, no server, no telemetry.<br>
+  Two files — <code>AGENTS.md</code> + <code>SKILL.md</code> — every agent reads and follows.<br>
+  Agents propose facts; humans approve. Git is the sync layer. No scripts, no server, no telemetry.<br>
   Claude Code · Codex · OpenCode · Devin · Antigravity · Cursor · Copilot · Windsurf · Gemini · Cline · Continue · Zed · Aider
 </p>
 
@@ -44,7 +44,7 @@
 <td width="33%" valign="top">
 
 ### Search-first
-`AGENTS.md` stays tiny (~300 tokens) — a router with pinned facts and a tag index. All content lives in `AGENTS.d/*.md`. Agents grep on demand. Prompt caches stay warm, token cost stays flat regardless of project size.
+`AGENTS.md` stays tiny — a router with pinned facts and a tag index. Optional detail lives in `AGENTS.d/*.md`, created on demand. Agents grep on demand. Prompt caches stay warm, token cost stays flat regardless of project size.
 
 </td>
 <td width="33%" valign="top">
@@ -63,17 +63,17 @@ No daemon, no sync server, no API, no telemetry, no account. Git is the sync lay
 ```sh
 cd your-project
 npx md-gossip install
-git add AGENTS.md AGENTS.d/ .gitignore
+git add AGENTS.md SKILL.md .gitignore
 git commit -m "add shared agent context"
 git push
 ```
 
-That's it. Every supported agent now reads `AGENTS.md` on session start and appends durable facts to `AGENTS.d/` as it learns them. Teammates clone the repo and their agents pick it up too — no install required on their side.
+That's it — install creates just **two files**: `AGENTS.md` (the protocol) and `SKILL.md` (the manual guide). `AGENTS.d/` is optional and created on demand. Every supported agent reads `AGENTS.md` on session start and suggests durable facts via `AGENTS.local.md` (gitignored, human-reviewed). Teammates clone the repo and their agents pick it up too — no install required on their side.
 
 **Global install** (write once per machine, every project inherits):
 
 ```sh
-npx md-gossip install --global
+npx md-gossip install --agents --global
 ```
 
 ---
@@ -83,51 +83,49 @@ npx md-gossip install --global
 ```
 your-repo/
 ├── AGENTS.md              ← tiny router. Pinned facts + tag index + protocol.
-├── AGENTS.d/              ← one file per tag. Agents grep on demand.
+├── SKILL.md               ← manual guide every agent reads (the rules)
+├── AGENTS.d/              ← OPTIONAL. One file per tag, created on demand.
 │   ├── stack.md
 │   ├── style.md
 │   ├── bugs.md
 │   ├── api.md
 │   ├── deploy.md
 │   └── prefs.md
-├── CLAUDE.md              ← symlink → AGENTS.md (gitignored)
-├── GEMINI.md               ← symlink → AGENTS.md (gitignored)
-├── .cursor/rules/md-gossip.mdc        ← wrapper with alwaysApply (gitignored)
-├── .continue/rules/md-gossip.md       ← wrapper with alwaysApply (gitignored)
-├── .github/copilot-instructions.md       ← symlink (gitignored)
-├── .windsurf/rules/context.md            ← wrapper (gitignored)
-└── ...
+├── AGENTS.local.md        ← agent suggestions, gitignored, human-reviewed
+└── ...                    ← agent pointer files only with `install --agents`
 ```
 
-Only `AGENTS.md` + `AGENTS.d/` are committed. Everything else is wired locally by each user running `install` once. Your repo stays clean on GitHub.
+Only `AGENTS.md` + `SKILL.md` (+ `AGENTS.d/` if you create it) are committed. Everything else is wired locally by each user running `install` once. Your repo stays clean on GitHub.
 
 ### The sync story
 
-**Reads** happen natively. Every agent loads its own expected filename at session start — `install` pointed that filename at `AGENTS.md`. No command runs; the agent does it.
+**Reads** happen natively. Every agent that supports `AGENTS.md` loads it at session start — it points to `SKILL.md`, the manual guide. Agents that don't read `AGENTS.md` natively get a one-line paste-in prompt via `md-gossip prompt <agent>`. No command runs; the agent does it.
 
-**Writes** happen when the agent edits files. The router header inside `AGENTS.md` tells it: *grep `AGENTS.d/`, append durable facts, dedup first.* Agents follow in-file instructions. They use their own edit tools.
+**Writes** are suggestions only. When an agent learns a durable fact, it appends one line to `AGENTS.local.md` — gitignored, never committed. `AGENTS.md`, `SKILL.md`, and shared `AGENTS.d/` chunks are read-only for agents.
 
-**Sync across machines** is git. Agents append → commit → push → other agents `git pull` → next session sees the new facts. No daemon, no realtime layer.
+**Human approval** closes the loop. You review `AGENTS.local.md`, promote approved facts into `AGENTS.d/<tag>.md` (or the Pinned section), commit, push — and every teammate's agent picks it up on next session. Agents propose, humans approve.
 
 ---
 
 ## Supported agents
 
-| Agent | Auto-read | Auto-write | Setup after install |
-|---|:-:|:-:|---|
-| Claude Code | ✓ | ✓ | none |
-| OpenAI Codex CLI | ✓ | ✓ | none |
-| OpenCode | ✓ | ✓ | none |
-| Devin (cloud + CLI) | ✓ | ✓ | none — reads `AGENTS.md` from repo |
-| Google Antigravity | ✓ | ✓ | none |
-| Cursor | ✓ | ✓ (agent mode) | none |
-| GitHub Copilot | ✓ | ✓ (agent mode) | none |
-| Windsurf | ✓ | ✓ | none |
-| Gemini CLI | ✓ | ✓ | none |
-| Cline | ✓ | ✓ | none |
-| Continue.dev | ✓ | ✓ (agent mode) | none |
-| Zed | ✓ | ✓ | none |
-| Aider | ✓ | ✓ | none — `install` edits `.aider.conf.yml` |
+| Agent | Reads AGENTS.md | Notes |
+|---|:-:|---|
+| Claude Code | ✓ | or paste `md-gossip prompt claude-code` into memory |
+| OpenAI Codex CLI | ✓ | |
+| OpenCode | ✓ | |
+| Devin (cloud + CLI) | ✓ | reads `AGENTS.md` from repo root |
+| Google Antigravity | ✓ | |
+| Cursor | via `.cursor/rules` | `install --agents` writes the wrapper, or paste the prompt |
+| GitHub Copilot | via copilot-instructions | `install --agents` or paste the prompt |
+| Windsurf | via rules | `install --agents` or paste the prompt |
+| Gemini CLI | ✓ | `GEMINI.md` wired with `--agents` |
+| Cline | via `.clinerules` | `install --agents` or paste the prompt |
+| Continue.dev | via rules | `install --agents` or paste the prompt |
+| Zed | ✓ | reads `AGENTS.md` natively |
+| Aider | via `.aider.conf.yml` | `install --agents` adds it to `read:` |
+
+Agents that don't read `AGENTS.md` natively still work: run `md-gossip prompt <agent>` and paste the output into that agent's instructions/rules settings — or use `install --agents` to write pointer files automatically.
 
 Adding a new agent = one row in [`src/adapters/registry.ts`](src/adapters/registry.ts). PRs welcome.
 
@@ -138,21 +136,24 @@ Adding a new agent = one row in [`src/adapters/registry.ts`](src/adapters/regist
 Every `AGENTS.md` ships with this header. Agents read it, follow it.
 
 ```
-READ
-1. Pinned facts (top of file) always apply.
-2. Need more? Run: rg "<keyword>" AGENTS.d/
+READ SKILL.md + AGENTS.md first — every session, before writing code.
+
+READ (details)
+1. Pinned facts (top of AGENTS.md) always apply.
+2. If AGENTS.d/ exists: need more? Run: rg "<keyword>" AGENTS.d/
 3. Or read one chunk: AGENTS.d/<tag>.md
 4. Never read all of AGENTS.d/ at once — defeats the point.
+5. Read AGENTS.local.md / AGENTS.d/local/ last — they override.
 
-WRITE (when you learn a durable fact)
-1. Pick the right tag (or create a new chunk).
-2. Grep first — skip if the fact already exists.
-3. Append ONE line: `#tag short fact under 120 chars`.
-4. Never delete lines you didn't write this session. Append-only.
+SUGGEST (durable facts only — agents NEVER edit shared files)
+1. Grep AGENTS.local.md first — skip if the fact already exists.
+2. Append ONE line: `#tag short fact under 120 chars`.
+3. Humans review AGENTS.local.md and promote facts manually.
 
-LOCAL OVERRIDES
-AGENTS.local.md and AGENTS.d/local/ are personal, gitignored.
-Read shared first, then local. Later overrides earlier.
+FORBIDDEN
+- Editing AGENTS.md, SKILL.md, or shared AGENTS.d/*.md.
+- Creating files other than AGENTS.local.md / AGENTS.d/local/*.md.
+- Deleting lines you didn't write this session.
 ```
 
 A durable fact looks like:
@@ -171,12 +172,16 @@ Grep-friendly. Human-readable. Diff-friendly in git. No embeddings, no RAG, no J
 ## Commands
 
 ```sh
-md-gossip install                       # default — wires all adapters
-md-gossip install --global              # also write to ~/.claude, ~/.codex, etc.
-md-gossip install --only claude-code,opencode,devin
-md-gossip install --force               # overwrite existing wrappers
-md-gossip install --skip-agents-md      # wire adapters without touching AGENTS.md
+md-gossip install                       # default — AGENTS.md + SKILL.md only
+md-gossip install --agents              # also wire per-agent pointer files
+md-gossip install --agents --only claude-code,cursor
+md-gossip install --agents --skills     # also write per-agent skill files
+md-gossip install --agents --global     # also write to ~/.claude, ~/.codex, etc.
+md-gossip install --agents --force      # overwrite existing files
+md-gossip install --minimal             # leanest: AGENTS.md only
+md-gossip install --skip-agents-md      # seed files without touching AGENTS.md
 
+md-gossip prompt [agent]                # print a paste-in prompt for any agent
 md-gossip status                        # show what's wired
 md-gossip clean                         # remove generated links/skills
 md-gossip clean --global                # also clean user-level files
@@ -190,11 +195,10 @@ Aliased as `gossip`.
 
 The install is designed for clean repos.
 
-- **Committed:** `AGENTS.md`, `AGENTS.d/*.md`, `.gitignore` entries.
-- **Gitignored:** every per-agent symlink, wrapper, and skill file.
-- **Gitignored automatically:** `AGENTS.local.md` and `AGENTS.d/local/` for personal overrides.
+- **Committed:** `AGENTS.md`, `SKILL.md`, `AGENTS.d/*.md` (if created), `.gitignore` entries.
+- **Gitignored:** `AGENTS.local.md`, `AGENTS.d/local/`, and every per-agent pointer/skill file.
 
-GitHub's file tree shows only the router and the chunks. Teammates not using `md-gossip` still see the shared context — GitHub renders `AGENTS.md` fine and most agents read it natively even without local wiring.
+GitHub's file tree shows only the two md files — clean for humans and agents alike. Teammates not using `md-gossip` still see the shared context — GitHub renders `AGENTS.md` fine and most agents read it natively even without local wiring.
 
 ---
 
@@ -206,7 +210,7 @@ The project follows three hard rules. If you contribute, follow them too.
 |---|---|
 | **Zero runtime dependencies** | Node stdlib only. devDeps are `typescript` + `@types/node`. If a feature needs a package, question whether the feature needs to exist. |
 | **Search-first, not load-first** | `AGENTS.md` stays small and cache-friendly. Chunks live in `AGENTS.d/` and agents grep them. Features that stuff large payloads into context get rejected. |
-| **Protocol-in-file beats protocol-in-code** | The header text inside `AGENTS.md` IS the skill. Native skill files (Claude, OpenCode, etc.) are polish. A read-only agent that only sees the file still participates. |
+| **Protocol-in-file beats protocol-in-code** | The header text inside `AGENTS.md` + `SKILL.md` IS the enforcement. Native skill files (Claude, OpenCode, etc.) are optional polish. A read-only agent that only sees the files still participates. |
 
 ### What's out of scope
 
@@ -223,7 +227,8 @@ TypeScript workspace, strict mode, ESM, no bundler.
 | `src/cli.ts` | Argument parsing, command dispatch |
 | `src/adapters/registry.ts` | One `Adapter` object per agent |
 | `src/adapters/skillFormats.ts` | Render skill body with the right frontmatter per agent |
-| `src/commands/install.ts` | The main command: seed `AGENTS.md`, wire targets, write skills, update `.gitignore` |
+| `src/commands/install.ts` | Seed `AGENTS.md` + `SKILL.md`, optionally wire agents, update `.gitignore` |
+| `src/commands/prompt.ts` | Print the universal paste-in prompt for any agent |
 | `src/commands/status.ts` | Report what's wired per adapter |
 | `src/commands/clean.ts` | Remove generated files; never touch `AGENTS.md` |
 | `src/core/fs.ts` | `linkOrCopy` — symlink with copy fallback on Windows |
@@ -233,7 +238,7 @@ TypeScript workspace, strict mode, ESM, no bundler.
 
 **Quality gates:**
 - `tsc --strict` with `noUncheckedIndexedAccess`.
-- 10 smoke tests covering install, idempotency, collision preservation, wrapper rendering, YAML safety.
+- 13 smoke tests covering install modes, idempotency, collision preservation, wrapper rendering, YAML safety.
 - CI: Ubuntu / macOS / Windows × Node 18 / 20 / 22.
 
 ---
@@ -243,7 +248,7 @@ TypeScript workspace, strict mode, ESM, no bundler.
 Building needs Node 18 or later.
 
 ```sh
-git clone https://github.com/<you>/md-gossip
+git clone https://github.com/aeiyannn/md-gossip
 cd md-gossip
 npm install
 npm run build

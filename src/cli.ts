@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { install } from "./commands/install.js";
+import { prompt } from "./commands/prompt.js";
 import { status } from "./commands/status.js";
 import { clean } from "./commands/clean.js";
 import { log } from "./core/log.js";
@@ -41,14 +42,23 @@ function help(): void {
 
 Usage:
   md-gossip [install] [options]    install into current project (default)
+                                   writes AGENTS.md + SKILL.md + AGENTS.d/ only
+  md-gossip prompt [agent]           print a paste-in prompt for any agent
   md-gossip status                   show which adapters are wired
   md-gossip clean [--global]         remove generated links/skills (keeps AGENTS.md)
 
 Install options:
-  --global                              also write user-level files (~/.claude, etc.)
+  --agents                              also wire per-agent pointer files
+                                        (CLAUDE.md, .cursor/rules/, ...)
+  --global                              with --agents: also write user-level files
   --only <a,b,c>                        limit to specific adapters by name
+                                        (implies --agents)
   --force                               overwrite existing files
   --skip-agents-md                      don't create AGENTS.md / AGENTS.d/
+  --minimal                             only AGENTS.md + AGENTS.d/;
+                                        no SKILL.md, no pointers, no globals
+  --skills                               with --agents: also write per-agent
+                                        skill files (.claude/skills/, ...)
 
 Adapters:
   claude-code, codex, opencode, devin, antigravity, cursor, copilot,
@@ -79,9 +89,15 @@ async function main(): Promise<void> {
         global: Boolean(args.flags.global),
         force: Boolean(args.flags.force),
         skipAgentsMd: Boolean(args.flags["skip-agents-md"]),
+        minimal: Boolean(args.flags.minimal),
+        skills: Boolean(args.flags.skills),
+        agents: Boolean(args.flags.agents),
       });
       return;
     }
+    case "prompt":
+      prompt(args.positional[0]);
+      return;
     case "status":
       status(cwd);
       return;
