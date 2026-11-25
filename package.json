@@ -1,10 +1,12 @@
 {
-  "name": "context-sync",
+  "name": "agentgossip",
   "version": "0.1.0",
-  "description": "One AGENTS.md for every coding agent. Shared context, zero scripts.",
+  "description": "One AGENTS.md for every coding agent. Agents gossip: read, write, and share project context — zero scripts.",
   "keywords": [
     "agents.md",
     "ai",
+    "agent",
+    "gossip",
     "claude",
     "codex",
     "devin",
@@ -16,9 +18,18 @@
   ],
   "license": "MIT",
   "type": "module",
+  "homepage": "https://github.com/aeiyannn/agentgossip#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aeiyannn/agentgossip.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aeiyannn/agentgossip/issues"
+  },
+  "author": "aeiyankhan",
   "bin": {
-    "context-sync": "bin/context-sync.js",
-    "ctxsync": "bin/context-sync.js"
+    "agentgossip": "bin/context-sync.js",
+    "gossip": "bin/context-sync.js"
   },
   "files": [
     "bin",
@@ -32,6 +43,9 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
